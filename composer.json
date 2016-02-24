@@ -1,0 +1,36 @@
+{
+    "name": "torann/snazzy-twig",
+    "description": "Render user templates using the power of Twig",
+    "authors": [
+        {
+            "name": "Daniel Stainback",
+            "email": "torann@gmail.com"
+        }
+    ],
+    "license": "BSD 2-Clause",
+    "keywords": [
+        "twig",
+        "templates",
+        "multi-tenancy",
+        "tenants"
+    ],
+    "require": {
+        "php": ">=5.5",
+        "illuminate/support": "5.1.*|5.2.*",
+        "twig/twig": "~1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "mockery/mockery": "^0.9.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Torann\\SnazzyTwig\\": "src/SnazzyTwig"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Torann\\SnazzyTwig\\Tests\\": "tests"
+        }
+    }
+}
