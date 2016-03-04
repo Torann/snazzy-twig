@@ -6,7 +6,7 @@ use App\Website;
 use Twig_Environment;
 use Twig_LoaderInterface;
 use Symfony\Component\Yaml\Yaml;
-use \Illuminate\View\ViewFinderInterface;
+use Illuminate\View\ViewFinderInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 
 class Environment extends Twig_Environment

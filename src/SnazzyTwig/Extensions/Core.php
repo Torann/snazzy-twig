@@ -129,7 +129,7 @@ class Core extends Twig_Extension
 
         $options = array_merge([
             'active_class' => 'current-page',
-            'menu_class' => 'list-pages cf',
+            'menu_class' => 'list-pages clearfix',
         ], $options);
 
         $html = [
