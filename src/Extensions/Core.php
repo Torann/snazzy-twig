@@ -69,6 +69,7 @@ class Core extends Twig_Extension
     {
         return [
             new TokenParsers\Widget(),
+            new TokenParsers\Contact(),
         ];
     }
 
