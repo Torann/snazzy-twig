@@ -15,8 +15,8 @@
         "tenants"
     ],
     "require": {
-        "php": ">=5.5",
-        "illuminate/support": "5.1.*|5.2.*",
+        "php": ">=5.6",
+        "illuminate/support": "~5.1",
         "twig/twig": "~1.0"
     },
     "require-dev": {
@@ -25,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Torann\\SnazzyTwig\\": "src/SnazzyTwig"
+            "Torann\\SnazzyTwig\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Torann\\SnazzyTwig\\Tests\\": "tests"
+            "Torann\\SnazzyTwig\\Tests\\": "tests/"
         }
     }
 }

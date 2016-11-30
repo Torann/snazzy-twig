@@ -16,7 +16,6 @@ class WidgetReference extends Twig_Node implements Twig_NodeOutputInterface
 
     public function compile(Twig_Compiler $compiler)
     {
-
         $compiler
             ->addDebugInfo($this)
             ->write(sprintf("\$this->displayWidget('%s', %s, \$context, \$blocks);\n",

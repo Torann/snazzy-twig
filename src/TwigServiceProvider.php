@@ -33,7 +33,15 @@ class TwigServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/twig.php', 'twig'
+        );
+
+        if ($this->isLumen() === false) {
+            $this->publishes([
+                __DIR__ . '/../config/twig.php' => config_path('twig.php')
+            ], 'config');
+        }
     }
 
     /**
@@ -43,11 +51,11 @@ class TwigServiceProvider extends ServiceProvider
      */
     protected function registerCacheSystem()
     {
-        $this->app->bind('twig.cache', function () {
+        $this->app->singleton('twig.cache', function ($app) {
             return new Cache\Filesystem(
                 $this->app['filesystem'],
                 $this->app['website'],
-                config('twig.cache_directory', 'twig-cache')
+                $app->config->get('twig.cache_directory', 'twig-cache')
             );
         });
     }
@@ -59,7 +67,7 @@ class TwigServiceProvider extends ServiceProvider
      */
     protected function registerLoaders()
     {
-        $this->app->bind('twig.loader', function () {
+        $this->app->singleton('twig.loader', function () {
             $filesystem = new Loaders\Filesystem(
                 'layouts',
                 $this->app['filesystem'],
@@ -79,7 +87,7 @@ class TwigServiceProvider extends ServiceProvider
      */
     protected function registerEngine()
     {
-        $this->app->bind('twig', function () {
+        $this->app->singleton('twig', function ($app) {
             $options = [
                 'debug' => env('APP_DEBUG', false),
                 'base_template_class' => Template::class,
@@ -95,16 +103,26 @@ class TwigServiceProvider extends ServiceProvider
             );
 
             // Set cache when not in debug mode
-            if (config('twig.cache', false) === true && $options['debug'] === false) {
+            if ($app->config->get('twig.cache', false) === true && $options['debug'] === false) {
                 $twig->setCache($this->app['twig.cache']);
             }
 
             // Add core extensions
             $twig->addExtension(new Extensions\Security);
-            $twig->addExtension(new Extensions\Core($this->app['website'], $this->app['cache']));
+            $twig->addExtension(new Extensions\Core($this->app['website']));
 
             return $twig;
-        }, true);
+        });
+    }
+
+    /**
+     * Check if package is running under Lumen app
+     *
+     * @return bool
+     */
+    protected function isLumen()
+    {
+        return str_contains($this->app->version(), 'Lumen') === true;
     }
 
     /**
