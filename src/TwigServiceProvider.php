@@ -3,7 +3,9 @@
 namespace Torann\SnazzyTwig;
 
 use Twig_Loader_Chain;
+use Twig_Extension_Sandbox;
 use Illuminate\Support\ServiceProvider;
+use Torann\SnazzyTwig\Extensions\Policies\SecurityPolicies;
 
 class TwigServiceProvider extends ServiceProvider
 {
@@ -53,8 +55,8 @@ class TwigServiceProvider extends ServiceProvider
     {
         $this->app->singleton('twig.cache', function ($app) {
             return new Cache\Filesystem(
-                $this->app['filesystem'],
-                $this->app['website'],
+                $app['filesystem'],
+                $app['website'],
                 $app->config->get('twig.cache_directory', 'twig-cache')
             );
         });
@@ -67,11 +69,11 @@ class TwigServiceProvider extends ServiceProvider
      */
     protected function registerLoaders()
     {
-        $this->app->singleton('twig.loader', function () {
+        $this->app->singleton('twig.loader', function ($app) {
             $filesystem = new Loaders\Filesystem(
                 'layouts',
-                $this->app['filesystem'],
-                $this->app['website']
+                $app['filesystem'],
+                $app['website']
             );
 
             return new Twig_Loader_Chain([
@@ -95,21 +97,23 @@ class TwigServiceProvider extends ServiceProvider
             ];
 
             $twig = new Environment(
-                $this->app['twig.loader'],
+                $app['twig.loader'],
                 $this->widgets,
                 $options,
-                $this->app['website'],
-                $this->app['events']
+                $app['website'],
+                $app['events']
             );
 
             // Set cache when not in debug mode
             if ($app->config->get('twig.cache', false) === true && $options['debug'] === false) {
-                $twig->setCache($this->app['twig.cache']);
+                $twig->setCache($app['twig.cache']);
             }
 
-            // Add core extensions
-            $twig->addExtension(new Extensions\Security);
-            $twig->addExtension(new Extensions\Core($this->app['website']));
+            // Add security policy extension
+            $twig->addExtension(new Twig_Extension_Sandbox(new SecurityPolicies, true));
+
+            // Add core extension
+            $twig->addExtension(new Extensions\Core($app['website'], $app['cache']));
 
             return $twig;
         });
