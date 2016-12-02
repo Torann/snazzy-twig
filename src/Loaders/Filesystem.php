@@ -65,7 +65,7 @@ class Filesystem implements Twig_LoaderInterface
         $source = $this->filesystem->get($this->getTemplatePath($name));
 
         // Extend all non layout templates
-        if ($name !== 'layout.twig' && substr($name, 0, 8) !== 'widgets/') {
+        if ($name !== 'layout.twig' && strpos($name, '/') === false) {
             return $this->cache[$key] = '{% extends "layout.twig" %}' . $source;
         }
 
@@ -99,7 +99,7 @@ class Filesystem implements Twig_LoaderInterface
     /**
      * Get the pull path to the template
      *
-     * @param  string @name
+     * @param string @name
      *
      * @return string
      */
