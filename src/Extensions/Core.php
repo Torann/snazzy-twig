@@ -85,6 +85,8 @@ class Core extends Twig_Extension
             new Twig_SimpleFunction('powered_by', [$this, 'functionGetPoweredBy'], ['is_safe' => ['twig', 'html']]),
             new Twig_SimpleFunction('list_pages', [$this, 'functionGetPageList'], ['is_safe' => ['twig', 'html']]),
             new Twig_SimpleFunction('url', [$this, 'functionGetUrl']),
+            new Twig_SimpleFunction('asset', [$this, 'functionGetUrl']),
+            new Twig_SimpleFunction('is_active', [$this, 'functionIsActive']),
             new Twig_SimpleFunction('csrf_token', [$this, 'functionGetCsrfToken']),
         ];
     }
@@ -110,6 +112,27 @@ class Core extends Twig_Extension
     public function functionGetCsrfToken()
     {
         return '<input type="hidden" name="_token" value="{{csrf_token}}">';
+    }
+
+    /**
+     * Determine if given url matches current url
+     *
+     * @param string $pattern
+     * @param string $active_text
+     * @param string $inactive_text
+     *
+     * @return string
+     */
+    function functionIsActive($pattern, $active_text = 'active', $inactive_text = '')
+    {
+        // Asterisks are translated into zero-or-more regular expression wildcards
+        // to make it convenient to check if the strings starts with the given
+        // pattern such as "library/*", making any string check convenient.
+        $pattern = str_replace('*', '.*', $pattern);
+
+        return preg_match('#^(' . $pattern . ')\z#', request()->path()) !== 0
+            ? $active_text
+            : $inactive_text;
     }
 
     /**
@@ -167,14 +190,14 @@ class Core extends Twig_Extension
      */
     public function functionGetPoweredBy()
     {
-        return '<a id="powered-by" href="#" target="_blank" class="powered-by">Powered by Skosh</a>';
+        return config('twig.branding');
     }
 
     /**
      * Is given URL the current page?
      *
-     * @param  string $url
-     * @param  string $pattern
+     * @param string $url
+     * @param string $pattern
      *
      * @return bool
      */
@@ -186,7 +209,7 @@ class Core extends Twig_Extension
     /**
      * Generate a url for the site.
      *
-     * @param  string $path
+     * @param string $path
      *
      * @return string
      */
@@ -198,9 +221,9 @@ class Core extends Twig_Extension
     /**
      * Truncate text to given length.
      *
-     * @param  string $string
-     * @param  int    $width
-     * @param  string $pad
+     * @param string $string
+     * @param int    $width
+     * @param string $pad
      *
      * @return mixed
      */
@@ -212,7 +235,7 @@ class Core extends Twig_Extension
     /**
      * Remove wrapping paragraphs from string.
      *
-     * @param  string $text
+     * @param string $text
      *
      * @return string
      */
@@ -224,8 +247,8 @@ class Core extends Twig_Extension
     /**
      * Get an item from the cache manager, or store the default value.
      *
-     * @param  string   $key
-     * @param  \Closure $callback
+     * @param string   $key
+     * @param \Closure $callback
      *
      * @return mixed
      */
@@ -245,8 +268,8 @@ class Core extends Twig_Extension
     /**
      * Get an item from local cache, or store the default value.
      *
-     * @param  string   $key
-     * @param  \Closure $callback
+     * @param string   $key
+     * @param \Closure $callback
      *
      * @return mixed
      */
@@ -276,7 +299,7 @@ class Core extends Twig_Extension
     /**
      * Create a cache tags
      *
-     * @param  string $name
+     * @param string $name
      *
      * @return string
      */
