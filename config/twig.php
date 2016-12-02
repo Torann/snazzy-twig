@@ -26,4 +26,15 @@ return [
 
     'cache_directory' => 'twig-cache',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Branding
+    |--------------------------------------------------------------------------
+    |
+    | Use this to set the branding message to show at the bottom of each page.
+    |
+    */
+
+    'branding' => '<a id="powered-by" href="http://lyften.com/projects/skosh" target="_blank" class="powered-by">Powered by Skosh</a>',
+
 ];
