@@ -27,7 +27,7 @@ class WidgetReference extends Twig_Node implements Twig_NodeOutputInterface
     /**
      * Convert an array to a string.
      *
-     * @param  array $options
+     * @param array $options
      *
      * @return string
      */
@@ -39,7 +39,7 @@ class WidgetReference extends Twig_Node implements Twig_NodeOutputInterface
             $values[] = $this->escape($key) . '=>' . $this->escape($value);
         }
 
-        return '[' . implode(',', $values). ']';
+        return '[' . implode(',', $values) . ']';
     }
 
     /**

@@ -39,10 +39,10 @@ class SecurityPolicies implements Twig_Sandbox_SecurityPolicyInterface
      * @var array
      */
     protected $allowedMethods = [
-        \Illuminate\Pagination\LengthAwarePaginator::class =>  [
+        \Illuminate\Pagination\LengthAwarePaginator::class => [
             'render', 'nextPageUrl', 'hasMorePages', 'total', 'lastPage'
         ],
-        \Torann\RemoteApi\Models\Collection::class =>  [
+        \Torann\RemoteApi\Models\Collection::class => [
             'render', 'nextPageUrl', 'hasMorePages', 'total', 'lastPage'
         ],
         \Illuminate\Support\HtmlString::class => [

@@ -62,8 +62,9 @@ class Environment extends Twig_Environment
     /**
      * Add a piece of shared data to the environment.
      *
-     * @param  array|string $key
-     * @param  mixed        $value
+     * @param array|string $key
+     * @param mixed        $value
+     *
      * @return mixed
      */
     public function share($key, $value = null)
@@ -80,7 +81,8 @@ class Environment extends Twig_Environment
     /**
      * Register multiple view widgets via an array.
      *
-     * @param  array  $widgets
+     * @param array $widgets
+     *
      * @return array
      */
     public function widgets(array $widgets)
@@ -97,24 +99,24 @@ class Environment extends Twig_Environment
     /**
      * Renders a template from source.
      *
-     * @param  object|string $source
-     * @param  array         $context
+     * @param object|string $source
+     * @param array         $context
+     *
      * @return string
      */
     public function make($source, array $context = [])
     {
+//echo "\n<h2>BEFORE</h2>\n" . $source . "\n\n\n\n";
         if (is_object($source)) {
             $source = $this->getSource($source, $context);
         }
-        else {
-            if (!is_string($source)) {
-                abort(404);
-            }
+        else if (is_string($source) === false) {
+            abort(404);
         }
 
         // Set page meta data
         $context = $this->setMetadata($context);
-
+//echo "\n<h2>AFTER</h2>\n" . $source . "\n\n\n\n";
         // Render template
         $template = $this->createTemplate($source)->render($context);
 
@@ -131,7 +133,8 @@ class Environment extends Twig_Environment
      * crap in the template. Makes it easier on the
      * less tech savvy users out there.
      *
-     * @param  array $context
+     * @param array $context
+     *
      * @return array
      */
     public function setMetadata(array $context = [])
@@ -163,28 +166,10 @@ class Environment extends Twig_Environment
     }
 
     /**
-     * Merges a context with the shared variables, same as mergeGlobals()
-     *
-     * @param  array $context
-     * @return array
-     */
-    public function mergeShared(array $context)
-    {
-        // We don't use array_merge as the context being generally
-        // bigger than globals, this code is faster.
-        foreach ($this->shared as $key => $value) {
-            if (!array_key_exists($key, $context)) {
-                $context[$key] = $value;
-            }
-        }
-
-        return $context;
-    }
-
-    /**
      * Get source from file.
      *
-     * @param  object $model
+     * @param object $model
+     *
      * @return string
      */
     protected function getSource($model)
@@ -210,7 +195,8 @@ class Environment extends Twig_Environment
     /**
      * Create a cache key from model
      *
-     * @param  object $model
+     * @param object $model
+     *
      * @return string
      */
     protected function getCacheKey($model)
@@ -221,7 +207,8 @@ class Environment extends Twig_Environment
     /**
      * Create a cache tags from model
      *
-     * @param  object $model
+     * @param object $model
+     *
      * @return string
      */
     protected function getCacheTags($model)
@@ -234,7 +221,8 @@ class Environment extends Twig_Environment
     /**
      * Parse metadata and content
      *
-     * @param  string $source
+     * @param string $source
+     *
      * @return array
      */
     protected function parseSource($source)
@@ -275,7 +263,8 @@ class Environment extends Twig_Environment
     /**
      * Normalize a view name.
      *
-     * @param  string $name
+     * @param string $name
+     *
      * @return string
      */
     protected function normalizeName($name)
@@ -299,9 +288,10 @@ class Environment extends Twig_Environment
     /**
      * Add an event for a given view.
      *
-     * @param  string   $view
-     * @param  string   $class
-     * @param  string   $prefix
+     * @param string $view
+     * @param string $class
+     * @param string $prefix
+     *
      * @return \Closure
      */
     protected function addViewEvent($view, $class, $prefix = 'composing: ')
@@ -321,8 +311,8 @@ class Environment extends Twig_Environment
     /**
      * Fire an event and call the listeners.
      *
-     * @param  string $name
-     * @param  mixed  $payload
+     * @param string $name
+     * @param mixed  $payload
      */
     public function fire($name, $payload = [])
     {
@@ -332,8 +322,9 @@ class Environment extends Twig_Environment
     /**
      * Build a class based container callback Closure.
      *
-     * @param  string $class
-     * @param  string $prefix
+     * @param string $class
+     * @param string $prefix
+     *
      * @return \Closure
      */
     protected function buildClassEventCallback($class, $prefix)
@@ -353,8 +344,9 @@ class Environment extends Twig_Environment
     /**
      * Parse a class based composer name.
      *
-     * @param  string $class
-     * @param  string $prefix
+     * @param string $class
+     * @param string $prefix
+     *
      * @return array
      */
     protected function parseClassEvent($class, $prefix)

@@ -35,7 +35,7 @@ class Filesystem implements Twig_CacheInterface
      *
      * @param FilesystemManager $filesystem
      * @param \App\Website      $website
-     * @param string           $directory
+     * @param string            $directory
      */
     public function __construct(FilesystemManager $filesystem, Website $website, $directory = 'twig-cache')
     {

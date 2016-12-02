@@ -25,8 +25,8 @@ abstract class Template extends Twig_Template
     /**
      * Add a piece of data to the view.
      *
-     * @param  array|string $key
-     * @param  mixed        $value
+     * @param array|string $key
+     * @param mixed        $value
      *
      * @return mixed
      */
