@@ -9,18 +9,11 @@ use Illuminate\Filesystem\FilesystemManager;
 class Filesystem implements Twig_LoaderInterface
 {
     /**
-     * Loader type.
+     * Path to the layouts.
      *
      * @var string
      */
-    protected $type;
-
-    /**
-     * Website instance.
-     *
-     * @var \App\Website
-     */
-    protected $website;
+    protected $path;
 
     /**
      * Filesystem instance
@@ -39,15 +32,13 @@ class Filesystem implements Twig_LoaderInterface
     /**
      * Create new Twig filesystem instance.
      *
-     * @param string            $type
      * @param FilesystemManager $filesystem
-     * @param \App\Website      $website
+     * @param string           $path
      */
-    public function __construct($type, FilesystemManager $filesystem, Website $website)
+    public function __construct(FilesystemManager $filesystem, $path)
     {
-        $this->type = $type;
         $this->filesystem = $filesystem;
-        $this->website = $website;
+        $this->path = trim($path, '/');
     }
 
     /**
@@ -105,6 +96,6 @@ class Filesystem implements Twig_LoaderInterface
      */
     protected function getTemplatePath($name)
     {
-        return $this->website->getPath($this->type, $name);
+        return $this->path . '/layouts/' . $name;
     }
 }

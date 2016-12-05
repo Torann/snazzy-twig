@@ -2,12 +2,11 @@
 
 namespace Torann\SnazzyTwig\Extensions;
 
-use Closure;
 use App\Website;
 use Twig_Extension;
 use Twig_SimpleFilter;
 use Twig_SimpleFunction;
-use Illuminate\Cache\CacheManager;
+use Illuminate\Support\Arr;
 
 class Core extends Twig_Extension
 {
@@ -19,45 +18,38 @@ class Core extends Twig_Extension
     protected $website;
 
     /**
-     * Cache manager instance.
-     *
-     * @var \Illuminate\Cache\CacheManager
-     */
-    protected $cacheManager;
-
-    /**
-     * Site root path.
+     * Branding message.
      *
      * @var string
      */
-    private $rootPath;
+    private $branding = '';
 
     /**
-     * Current URL path.
-     *
-     * @var string
-     */
-    private $currentPath;
-
-    /**
-     * Local cache for repeated calls.
+     * Custom functions array.
      *
      * @var array
      */
-    private $cache = [];
+    private $customFunctions = [];
+
+    /**
+     * Custom filters array.
+     *
+     * @var array
+     */
+    private $customFilters = [];
 
     /**
      * Create a new instance of AbstractExtension.
      *
-     * @param Website      $website
-     * @param CacheManager $cache
+     * @param Website $website
      */
-    public function __construct(Website $website, CacheManager $cache)
+    public function __construct(Website $website, array $config = [])
     {
         $this->website = $website;
-        $this->cacheManager = $cache;
-        $this->rootPath = trim(url('/'), '/');
-        $this->currentPath = app('request')->getPathInfo();
+
+        $this->customFunctions = Arr::get($config, 'functions', []);
+        $this->customFilters = Arr::get($config, 'filters', []);
+        $this->branding = Arr::get($config, 'branding', '');
     }
 
     /**
@@ -80,15 +72,32 @@ class Core extends Twig_Extension
      */
     public function getFunctions()
     {
-        return [
-            new Twig_SimpleFunction('isCurrent', [$this, 'functionIsCurrent']),
+        return $this->mergeCustomFunctions([
             new Twig_SimpleFunction('powered_by', [$this, 'functionGetPoweredBy'], ['is_safe' => ['twig', 'html']]),
-            new Twig_SimpleFunction('list_pages', [$this, 'functionGetPageList'], ['is_safe' => ['twig', 'html']]),
             new Twig_SimpleFunction('url', [$this, 'functionGetUrl']),
-            new Twig_SimpleFunction('asset', [$this, 'functionGetUrl']),
-            new Twig_SimpleFunction('is_active', [$this, 'functionIsActive']),
             new Twig_SimpleFunction('csrf_token', [$this, 'functionGetCsrfToken']),
-        ];
+        ]);
+    }
+
+    /**
+     * Merge custom functions into existing list.
+     *
+     * @param array $functions
+     *
+     * @return array
+     */
+    protected function mergeCustomFunctions($functions)
+    {
+        foreach ($this->customFunctions as $name => $fn) {
+            if (is_string($fn)) {
+                $functions[$name] = new Twig_SimpleFunction($name, $fn);
+            }
+            else {
+                $functions[$name] = new Twig_SimpleFunction($name, $fn['callable'], Arr::get($fn, 'options', []));
+            }
+        }
+
+        return $functions;
     }
 
     /**
@@ -98,10 +107,31 @@ class Core extends Twig_Extension
      */
     public function getFilters()
     {
-        return [
+        return $this->mergeCustomFilters([
             new Twig_SimpleFilter('truncate', [$this, 'filterTruncate'], ['is_safe' => ['twig', 'html']]),
             new Twig_SimpleFilter('paragraph', [$this, 'filterRemoveParagraphs'], ['is_safe' => ['twig', 'html']]),
-        ];
+        ]);
+    }
+
+    /**
+     * Merge custom functions into existing list.
+     *
+     * @param array $filters
+     *
+     * @return array
+     */
+    protected function mergeCustomFilters($filters)
+    {
+        foreach ($this->customFilters as $name => $fn) {
+            if (is_string($fn)) {
+                $filters[$name] = new Twig_SimpleFilter($name, $fn);
+            }
+            else {
+                $filters[$name] = new Twig_SimpleFilter($name, $fn['callable'], Arr::get($fn, 'options', []));
+            }
+        }
+
+        return $filters;
     }
 
     /**
@@ -115,95 +145,13 @@ class Core extends Twig_Extension
     }
 
     /**
-     * Determine if given url matches current url
-     *
-     * @param string $pattern
-     * @param string $active_text
-     * @param string $inactive_text
-     *
-     * @return string
-     */
-    function functionIsActive($pattern, $active_text = 'active', $inactive_text = '')
-    {
-        // Asterisks are translated into zero-or-more regular expression wildcards
-        // to make it convenient to check if the strings starts with the given
-        // pattern such as "library/*", making any string check convenient.
-        $pattern = str_replace('*', '.*', $pattern);
-
-        return preg_match('#^(' . $pattern . ')\z#', request()->path()) !== 0
-            ? $active_text
-            : $inactive_text;
-    }
-
-    /**
-     * Is given URL the current page?
-     *
-     * @return array
-     */
-    public function functionGetPageList($options = null)
-    {
-        // Get content
-        $content = $this->getCache('functionGetPageList', function () {
-            return $this->website->getRootPages();
-        });
-
-        if ($options === null) {
-            return count($content) > 0;
-        }
-
-        $options = array_merge([
-            'active_class' => 'current-page',
-            'menu_class' => 'list-pages clearfix',
-        ], $options);
-
-        $html = [
-            "<ul id=\"pages-nav\" class=\"{$options['menu_class']}\">"
-        ];
-
-        foreach ($content as $item) {
-            // Skip the home page
-            if ($item->is_home || $item->is_hidden) {
-                continue;
-            }
-
-            // Get trimmed Permalink
-            $url = '/' . trim(str_replace($this->rootPath, '', $item->permalink), '/');
-
-            // Create a pattern
-            $pattern = ($url === '/') ? '/' : "{$url}*";
-
-            // Get active class
-            $class = str_is($pattern, $this->currentPath) ? $options['active_class'] : '';
-
-            $html[] = "<li class=\"{$class}\" role=\"presentation\"><a href=\"{$item->permalink}\" role=\"button\">{$item->title}</a></li>";
-        }
-
-        $html[] = "</ul>";
-
-        return implode('', $html);
-    }
-
-    /**
      * Display branding tag.
      *
      * @return string
      */
     public function functionGetPoweredBy()
     {
-        return config('twig.branding');
-    }
-
-    /**
-     * Is given URL the current page?
-     *
-     * @param string $url
-     * @param string $pattern
-     *
-     * @return bool
-     */
-    public function functionIsCurrent($url, $pattern)
-    {
-        return str_is($pattern, '/' . str_replace($this->rootPath, '', $url));
+        return $this->branding;
     }
 
     /**
@@ -222,14 +170,24 @@ class Core extends Twig_Extension
      * Truncate text to given length.
      *
      * @param string $string
-     * @param int    $width
+     * @param int    $limit
      * @param string $pad
      *
      * @return mixed
      */
-    public function filterTruncate($string, $width, $pad = '&hellip;')
+    public function filterTruncate($string, $limit, $pad = '&hellip;')
     {
-        return truncate($string, $width, $pad);
+        // return with no change if string is shorter than $limit
+        if (strlen($string) <= $limit) return $string;
+
+        // is $break present between $limit and the end of the string?
+        if (false !== ($breakpoint = strpos($string, ' ', $limit))) {
+            if ($breakpoint < strlen($string) - 1) {
+                $string = substr($string, 0, $breakpoint) . $pad;
+            }
+        }
+
+        return $string;
     }
 
     /**
@@ -245,48 +203,6 @@ class Core extends Twig_Extension
     }
 
     /**
-     * Get an item from the cache manager, or store the default value.
-     *
-     * @param string   $key
-     * @param \Closure $callback
-     *
-     * @return mixed
-     */
-    public function getCache($key, Closure $callback)
-    {
-        // Skip cache for development
-        if (config('app.debug')) {
-            return $this->getLocalCache($key, $callback);
-        }
-
-        $key = $this->website->id . '-' . $key;
-        $tags = $this->getCacheTags('pages');
-
-        return $this->cacheManager->tags($tags)->rememberForever($key, $callback);
-    }
-
-    /**
-     * Get an item from local cache, or store the default value.
-     *
-     * @param string   $key
-     * @param \Closure $callback
-     *
-     * @return mixed
-     */
-    public function getLocalCache($key, Closure $callback)
-    {
-        // If the item exists in the cache we will just return this immediately
-        // otherwise we will execute the given Closure and cache the result.
-        if (!is_null($value = array_get($this->cache, $key))) {
-            return $value;
-        }
-
-        $callback->bindTo($this);
-
-        return $this->cache[$key] = $callback();
-    }
-
-    /**
      * Returns the name of the extension.
      *
      * @return string
@@ -294,19 +210,5 @@ class Core extends Twig_Extension
     public function getName()
     {
         return 'base_extensions';
-    }
-
-    /**
-     * Create a cache tags
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    protected function getCacheTags($name)
-    {
-        $key = $this->website->getCacheKey();
-
-        return [$key, "{$key}.{$name}"];
     }
 }

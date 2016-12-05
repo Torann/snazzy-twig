@@ -71,9 +71,8 @@ class TwigServiceProvider extends ServiceProvider
     {
         $this->app->singleton('twig.loader', function ($app) {
             $filesystem = new Loaders\Filesystem(
-                'layouts',
                 $app['filesystem'],
-                $app['website']
+                $app['website']->getStoragePath()
             );
 
             return new Twig_Loader_Chain([
@@ -113,7 +112,10 @@ class TwigServiceProvider extends ServiceProvider
             $twig->addExtension(new Twig_Extension_Sandbox(new SecurityPolicies, true));
 
             // Add core extension
-            $twig->addExtension(new Extensions\Core($app['website'], $app['cache']));
+            $twig->addExtension(new Extensions\Core(
+                $app['website'],
+                $app->config->get('twig')
+            ));
 
             return $twig;
         });
