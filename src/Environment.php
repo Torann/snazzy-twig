@@ -106,7 +106,6 @@ class Environment extends Twig_Environment
      */
     public function make($source, array $context = [])
     {
-//echo "\n<h2>BEFORE</h2>\n" . $source . "\n\n\n\n";
         if (is_object($source)) {
             $source = $this->getSource($source, $context);
         }
@@ -116,7 +115,7 @@ class Environment extends Twig_Environment
 
         // Set page meta data
         $context = $this->setMetadata($context);
-//echo "\n<h2>AFTER</h2>\n" . $source . "\n\n\n\n";
+
         // Render template
         $template = $this->createTemplate($source)->render($context);
 

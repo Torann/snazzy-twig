@@ -3,7 +3,7 @@
 namespace Torann\SnazzyTwig;
 
 use Twig_Template;
-use Torann\RemoteApi\Models\Model as ApiModel;
+use BaseApiClient\Models\Model as ApiModel;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 abstract class Template extends Twig_Template
