@@ -3,8 +3,6 @@
 namespace Torann\SnazzyTwig;
 
 use Twig_Template;
-use BaseApiClient\Models\Model as ApiModel;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 abstract class Template extends Twig_Template
 {
@@ -48,6 +46,8 @@ abstract class Template extends Twig_Template
      * @param array  $options
      * @param array  $context
      * @param array  $blocks
+     *
+     * @internal
      */
     public function displayWidget($name, array $options = [], array $context = [], array $blocks = [])
     {
@@ -55,7 +55,7 @@ abstract class Template extends Twig_Template
         $this->env->fire('composing: widgets.' . $name, [$this, $context, $options]);
 
         // Render widget with new context
-        return $this->displayBlock($name, array_merge($context, $this->with), $blocks);
+        $this->displayBlock($name, array_merge($context, $this->with), $blocks);
     }
 
     /**
@@ -67,7 +67,7 @@ abstract class Template extends Twig_Template
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function getAttribute($object, $item, array $arguments = [], $type = Twig_Template::ANY_CALL, $isDefinedTest = false, $ignoreStrictCheck = false)
     {
@@ -95,7 +95,7 @@ abstract class Template extends Twig_Template
      */
     protected function isModel($object)
     {
-        return ($object instanceof EloquentModel)
-            || ($object instanceof ApiModel);
+        return ($object instanceof \Illuminate\Database\Eloquent\Model)
+            || ($object instanceof \BaseApiClient\Models\Model);
     }
 }

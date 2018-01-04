@@ -20,7 +20,7 @@ $ composer require torann/snazzy-twig
 
 ### The Service Provider
 
-It is recommend to extend the built in service provider so that you can add your custom widgets. To do this create a service provider named `TwigServiceProvider` in the `\app\Providers` directory and extend the Snazzy Twig provider like below:
+You will need to extend the built in service provider so that you can add your custom widgets and get the website instance. To do this create a service provider named `TwigServiceProvider` in the `\app\Providers` directory and extend the Snazzy Twig provider like below:
 
 ```php
 <?php
@@ -39,8 +39,20 @@ class TwigServiceProvider extends ServiceProvider
     protected $widgets = [
         //
     ];
+    
+    /**
+     * Get the current website.
+     *
+     * @return \Torann\SnazzyTwig\Contracts\WebsiteInterface
+     */
+    protected function getWebsite()
+    {
+        return $this->app['website'];
+    }
 }
 ```
+
+> **Note:** the `getWebsite()` method is needed to get the website model to use for generating the views
 
 Once this is done you need to register the new service provider with the application.
 

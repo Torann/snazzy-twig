@@ -4,17 +4,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Resource Path
-    |--------------------------------------------------------------------------
-    |
-    | Use this to define the storage path of a website's resources.
-    |
-    */
-
-    'resource_path' => 'websites/{id}',
-
-    /*
-    |--------------------------------------------------------------------------
     | Custom Twig Functions
     |--------------------------------------------------------------------------
     |
@@ -53,16 +42,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Twig Caching
+    | Loader
     |--------------------------------------------------------------------------
     |
-    | Here you define the caching options for twig.
-    |
-    | NOTE: This is experimental
+    | Loaders are responsible for loading templates from a resource such as
+    | the file system. Use this to set a custom loader
     |
     */
 
-    'cache' => false,
+    'loader' => \Torann\SnazzyTwig\Loaders\Filesystem::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Caching
+    |--------------------------------------------------------------------------
+    |
+    | Here you define class that handles the caching.
+    |
+    */
+
+    'cache' => \Torann\SnazzyTwig\Cache\Filesystem::class,
 
     /*
     |--------------------------------------------------------------------------

@@ -2,18 +2,18 @@
 
 namespace Torann\SnazzyTwig\Extensions;
 
-use App\Website;
 use Twig_Extension;
 use Twig_SimpleFilter;
 use Twig_SimpleFunction;
 use Illuminate\Support\Arr;
+use Torann\SnazzyTwig\Contracts\WebsiteInterface;
 
 class Core extends Twig_Extension
 {
     /**
      * Website instance.
      *
-     * @var \App\Website
+     * @var WebsiteInterface
      */
     protected $website;
 
@@ -41,9 +41,10 @@ class Core extends Twig_Extension
     /**
      * Create a new instance of AbstractExtension.
      *
-     * @param Website $website
+     * @param WebsiteInterface $website
+     * @param array            $config
      */
-    public function __construct(Website $website, array $config = [])
+    public function __construct(WebsiteInterface $website, array $config = [])
     {
         $this->website = $website;
 

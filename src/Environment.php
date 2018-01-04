@@ -2,19 +2,19 @@
 
 namespace Torann\SnazzyTwig;
 
-use App\Website;
 use Twig_Environment;
 use Twig_LoaderInterface;
 use Symfony\Component\Yaml\Yaml;
 use Illuminate\View\ViewFinderInterface;
 use Illuminate\Contracts\Events\Dispatcher;
+use Torann\SnazzyTwig\Contracts\WebsiteInterface;
 
 class Environment extends Twig_Environment
 {
     /**
      * Website instance.
      *
-     * @var \App\Website
+     * @var WebsiteInterface
      */
     protected $website;
 
@@ -31,7 +31,7 @@ class Environment extends Twig_Environment
      * @var array
      */
     protected $ignoreTemplate = [
-        'xml'
+        'xml',
     ];
 
     /**
@@ -40,16 +40,17 @@ class Environment extends Twig_Environment
      * @param Twig_LoaderInterface $loader
      * @param array                $widgets
      * @param array                $options
-     * @param Website              $website
+     * @param WebsiteInterface     $website
      * @param Dispatcher           $events
      */
     public function __construct(
         Twig_LoaderInterface $loader,
         $widgets = [],
         $options = [],
-        Website $website,
+        WebsiteInterface $website,
         Dispatcher $events
-    ) {
+    )
+    {
         parent::__construct($loader, $options);
 
         $this->website = $website;
@@ -159,7 +160,7 @@ class Environment extends Twig_Environment
     {
         $template = parent::loadTemplate($name, $index);
 
-        $template->setName($this->normalizeName($name));
+        //$template->setName($this->normalizeName($name));
 
         return $template;
     }
@@ -167,11 +168,12 @@ class Environment extends Twig_Environment
     /**
      * Get source from file.
      *
-     * @param object $model
+     * @param mixed $model
+     * @param array $context
      *
      * @return string
      */
-    protected function getSource($model)
+    protected function getSource($model, array $context = [])
     {
         // All pages extend the primary layout
         $source = "{% extends \"{$model->template}.twig\" %}";
@@ -179,12 +181,12 @@ class Environment extends Twig_Environment
         // Special features for layout extending
         if ($model->template !== 'layout') {
             $source .= "{% block content %}";
-            $source .= $model->body;
+            $source .= $model->content;
             $source .= "{% endblock %}";
         }
         else {
             $source .= "{% block layout %}";
-            $source .= $model->body;
+            $source .= $model->content;
             $source .= "{% endblock %}";
         }
 

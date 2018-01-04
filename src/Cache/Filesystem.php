@@ -3,16 +3,15 @@
 namespace Torann\SnazzyTwig\Cache;
 
 use Exception;
-use App\Website;
-use Twig_CacheInterface;
 use Illuminate\Filesystem\FilesystemManager;
+use Torann\SnazzyTwig\Contracts\WebsiteInterface;
 
-class Filesystem implements Twig_CacheInterface
+class Filesystem extends AbstractCache
 {
     /**
      * Website instance.
      *
-     * @var \App\Website
+     * @var WebsiteInterface
      */
     protected $website;
 
@@ -34,41 +33,42 @@ class Filesystem implements Twig_CacheInterface
      * Create new filesystem cache instance.
      *
      * @param FilesystemManager $filesystem
-     * @param \App\Website      $website
      * @param string            $directory
      */
-    public function __construct(FilesystemManager $filesystem, Website $website, $directory = 'twig-cache')
+    public function __construct(FilesystemManager $filesystem, $directory = 'twig-cache')
     {
         $this->filesystem = $filesystem;
-        $this->website = $website;
         $this->directory = $directory;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function generateKey($name, $className)
     {
-        $hash = hash('sha256', $className);
-
-        return $this->directory . '/' . $this->website->getCacheKey() . '/' . $hash;
+        return $this->directory . '/' . parent::generateKey($name, $className);
     }
 
     /**
-     * {@inheritdoc}
+     * Get the cached source.
+     * 
+     * @param string $key
+     * 
+     * @return string
      */
-    public function load($key)
+    public function getSource($key)
     {
         try {
-            $content = $this->filesystem->get($key);
-
-            eval('?>' . $content);
-        } catch (Exception $e) {
+            return $this->filesystem->get($key);
         }
+        catch (Exception $e) {
+        }
+
+        return '';
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function write($key, $content)
     {
@@ -84,7 +84,7 @@ class Filesystem implements Twig_CacheInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getTimestamp($key)
     {

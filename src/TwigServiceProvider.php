@@ -4,10 +4,11 @@ namespace Torann\SnazzyTwig;
 
 use Twig_Loader_Chain;
 use Twig_Extension_Sandbox;
+use InvalidArgumentException;
 use Illuminate\Support\ServiceProvider;
 use Torann\SnazzyTwig\Extensions\Policies\SecurityPolicies;
 
-class TwigServiceProvider extends ServiceProvider
+abstract class TwigServiceProvider extends ServiceProvider
 {
     /**
      * Twig view widgets.
@@ -54,11 +55,21 @@ class TwigServiceProvider extends ServiceProvider
     protected function registerCacheSystem()
     {
         $this->app->singleton('twig.cache', function ($app) {
-            return new Cache\Filesystem(
-                $app['filesystem'],
-                $app['website'],
-                $app->config->get('twig.cache_directory', 'twig-cache')
-            );
+
+            // Get class from the config
+            $class = $app->config->get('twig.cache');
+
+            if (class_exists($class) === false) {
+                throw new InvalidArgumentException("Twig cache [{$class}] is not defined.");
+            }
+
+            // Create cache instance
+            $loader = $app->make($class, [
+                'directory' => $app->config->get('twig.cache_directory', 'twig-cache'),
+            ]);
+
+            // Set path and return
+            return $loader->setWebsite($this->getWebsite());
         });
     }
 
@@ -70,13 +81,23 @@ class TwigServiceProvider extends ServiceProvider
     protected function registerLoaders()
     {
         $this->app->singleton('twig.loader', function ($app) {
-            $filesystem = new Loaders\Filesystem(
-                $app['filesystem'],
-                $app['website']->getStoragePath()
-            );
 
+            // Get class from the config
+            $class = $app->config->get('twig.loader');
+
+            if (class_exists($class) === false) {
+                throw new InvalidArgumentException("Twig loader [{$class}] is not defined.");
+            }
+
+            // Create loader instance
+            $loader = $app->make($class);
+
+            // Set path and return
+            $loader->setPath($this->getWebsite()->getStoragePath());
+
+            // TODO: this might not be needededede
             return new Twig_Loader_Chain([
-                $filesystem,
+                $loader,
             ]);
         });
     }
@@ -99,12 +120,12 @@ class TwigServiceProvider extends ServiceProvider
                 $app['twig.loader'],
                 $this->widgets,
                 $options,
-                $app['website'],
+                $this->getWebsite(),
                 $app['events']
             );
 
             // Set cache when not in debug mode
-            if ($app->config->get('twig.cache', false) === true && $options['debug'] === false) {
+            if ($app->config->get('twig.cache') && $options['debug'] === false) {
                 $twig->setCache($app['twig.cache']);
             }
 
@@ -113,7 +134,7 @@ class TwigServiceProvider extends ServiceProvider
 
             // Add core extension
             $twig->addExtension(new Extensions\Core(
-                $app['website'],
+                $this->getWebsite(),
                 $app->config->get('twig')
             ));
 
@@ -130,6 +151,13 @@ class TwigServiceProvider extends ServiceProvider
     {
         return str_contains($this->app->version(), 'Lumen') === true;
     }
+
+    /**
+     * Get the current website.
+     *
+     * @return \Torann\SnazzyTwig\Contracts\WebsiteInterface
+     */
+    abstract protected function getWebsite();
 
     /**
      * Get the services provided by the provider.
