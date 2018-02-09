@@ -95,7 +95,6 @@ abstract class TwigServiceProvider extends ServiceProvider
             // Set path and return
             $loader->setPath($this->getWebsite()->getStoragePath());
 
-            // TODO: this might not be needededede
             return new Twig_Loader_Chain([
                 $loader,
             ]);

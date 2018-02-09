@@ -7,10 +7,11 @@ if (!function_exists('twig')) {
      * @param  string $source
      * @param  array  $data
      *
-     * @return string
+     * @return \Torann\SnazzyTwig\Environment|string
      */
     function twig($source = null, $data = [])
     {
+        /** @var \Torann\SnazzyTwig\Environment $twig */
         $twig = app('twig');
 
         if (func_num_args() === 0) {

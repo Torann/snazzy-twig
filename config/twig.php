@@ -4,6 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Preview Mode
+    |--------------------------------------------------------------------------
+    |
+    | When a user is editing their website, this should be set to true in a
+    | middleware or some other dynamic way by the system.
+    |
+    */
+
+    'preview_mode' => false,
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Custom Twig Functions
     |--------------------------------------------------------------------------
     |

@@ -66,6 +66,8 @@ abstract class AbstractLoader implements Twig_LoaderInterface
      */
     public function exists($name)
     {
+        config();
+
         return $this->filesystem->exists($this->getTemplatePath($name));
     }
 
@@ -80,12 +82,27 @@ abstract class AbstractLoader implements Twig_LoaderInterface
     /**
      * Get the pull path to the template
      *
-     * @param string @name
+     * @param string $name
      *
      * @return string
      */
     protected function getTemplatePath($name)
     {
-        return $this->path . '/layouts/' . $name;
+        $path =  $this->path . DIRECTORY_SEPARATOR . 'layouts' . DIRECTORY_SEPARATOR . $name;
+
+        // If not requesting a preview then skip this
+        if (config('twig.preview_mode', false) === false) {
+            return $path;
+        }
+
+        // Set the preview file path
+        $preview_path = preg_replace_callback('/[^.\/]+?\.[^.]+$/i', function($matches) {
+            return "preview_{$matches[0]}";
+        }, $path);
+
+        // Only return the path if it exists
+        return file_exists($preview_path)
+            ? $preview_path
+            : $path;
     }
 }
