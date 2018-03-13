@@ -2,7 +2,6 @@
 
 [![Latest Stable Version](https://poser.pugx.org/torann/snazzy-twig/v/stable.png)](https://packagist.org/packages/torann/snazzy-twig) [![Total Downloads](https://poser.pugx.org/torann/snazzy-twig/downloads.png)](https://packagist.org/packages/torann/snazzy-twig)
 
-
 Laravel implantation of [Skosh](https://github.com/Torann/skosh)'s Twig templating engine for use in a multi-tenant environment.
 
 - [Snazzy Twig on Packagist](https://packagist.org/packages/torann/snazzy-twig)
