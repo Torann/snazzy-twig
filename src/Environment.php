@@ -118,12 +118,12 @@ class Environment extends Twig_Environment
         $context = $this->setMetadata($context);
 
         // Render template
-        $template = $this->createTemplate($source)->render($context);
+        $html = $this->createTemplate($source)->render($context);
 
         // Insert CSRF token meta tag
-        $template = str_replace('</head>', '<meta name="csrf-token" content="{{csrf_token}}"></head>', $template);
+        $html = str_replace('</head>', '<meta name="csrf-token" content="{{csrf_token}}"></head>', $html);
 
-        return $template;
+        return $html;
     }
 
     /**
