@@ -3,7 +3,6 @@
 namespace Torann\SnazzyTwig\Extensions\Policies;
 
 use Twig_Markup;
-use Twig_TemplateInterface;
 use Twig_Sandbox_SecurityPolicyInterface;
 
 use Twig_Sandbox_SecurityError;
@@ -97,7 +96,7 @@ class SecurityPolicies implements Twig_Sandbox_SecurityPolicyInterface
      */
     public function checkMethodAllowed($obj, $method)
     {
-        if ($obj instanceof Twig_TemplateInterface || $obj instanceof Twig_Markup) {
+        if ($obj instanceof Twig_Markup) {
             return true;
         }
 
