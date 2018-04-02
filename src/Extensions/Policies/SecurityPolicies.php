@@ -96,7 +96,7 @@ class SecurityPolicies implements Twig_Sandbox_SecurityPolicyInterface
      */
     public function checkMethodAllowed($obj, $method)
     {
-        if ($obj instanceof Twig_Markup) {
+        if ($obj instanceof Twig_Markup || $obj instanceof \Illuminate\Support\Carbon) {
             return true;
         }
 
