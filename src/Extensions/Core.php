@@ -160,12 +160,25 @@ class Core extends Twig_Extension
      * Generate a url for the site.
      *
      * @param string $path
+     * @param mixed  $parameters
+     * @param bool   $secure
      *
      * @return string
      */
-    public function functionGetUrl($path)
+    public function functionGetUrl($path, $parameters = [], $secure = null)
     {
-        return url($path);
+        // This treats all parameters as a query string
+        $url = url($path, [], $secure);
+
+        // Add query string
+        if (count($parameters) > 0) {
+            $connector = substr($url, -1) === '?' ? '&' : '?';
+
+            $url = sprintf("%s{$connector}%s", $url, http_build_query($parameters));
+        }
+
+        return $url;
+
     }
 
     /**
